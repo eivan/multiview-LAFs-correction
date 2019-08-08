@@ -1,0 +1,3 @@
+[submodule "src/dependencies/openMVG"]
+	path = src/dependencies/openMVG
+	url = https://github.com/eivan/openMVG.git

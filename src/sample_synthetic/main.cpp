@@ -44,13 +44,13 @@ int main() {
   return 0;
 }
 
-void CreateStereoPair(Mat3& K1, Mat3& K2, Mat3& R1, Mat3& R2, Vec3& t1, Vec3& t2) {
+void CreateStereoPair(Mat3d& K1, Mat3d& K2, Mat3d& R1, Mat3d& R2, Vec3d& t1, Vec3d& t2) {
   // Create camera matrices
-  K1 = (Mat3() << 1500, 0, 750, 0, 1500, 750, 0, 0, 1).finished();
-  K2 = (Mat3() << 1500, 0, 750, 0, 1500, 750, 0, 0, 1).finished();
+  K1 = (Mat3d() << 1500, 0, 750, 0, 1500, 750, 0, 0, 1).finished();
+  K2 = (Mat3d() << 1500, 0, 750, 0, 1500, 750, 0, 0, 1).finished();
 
   // Generate poses (R, t)
-  Vec3
+  Vec3d
     eye1{ 4.0, 10.0, 7.0 },
     eye2{ 6, 0, 9 },
     target{ 0,0,0 };
@@ -67,28 +67,28 @@ auto CreateMultiviewScene(size_t num_views) {
 
   struct View {
     ViewID index;
-    Mat3 K, R;
-    Vec3 t;
+    Mat3d K, R;
+    Vec3d t;
 
-    inline Vec2 operator()(const Vec3& X) const {
+    inline Vec2d operator()(const Vec3d& X) const {
       return project(K, R * X + t);
     }
 
-    inline Mat23 gradient(const Vec3& X) const {
+    inline Mat23d gradient(const Vec3d& X) const {
       return project_gradient(K, R * X + t) * R;
     }
   };
 
   std::vector<View> views(num_views);
 
-  Vec3 target{ 0,0,0 };
+  Vec3d target{ 0,0,0 };
 
   for (ViewID i = 0; i < num_views; ++i) {
 
-    Vec3 eye = Vec3::Random().normalized() * 10;
+    Vec3d eye = Vec3d::Random().normalized() * 10;
 
     views[i].index = i;
-    views[i].K = (Mat3() << 1500, 0, 750, 0, 1500, 750, 0, 0, 1).finished();
+    views[i].K = (Mat3d() << 1500, 0, 750, 0, 1500, 750, 0, 0, 1).finished();
     views[i].R = LookAt_target(eye, target);
     views[i].t = -views[i].R * eye;
   }
@@ -98,38 +98,38 @@ auto CreateMultiviewScene(size_t num_views) {
 
 void StereoTest_BMVC2016() {
 
-  Mat3 K1, K2, R1, R2;
-  Vec3 t1, t2;
+  Mat3d K1, K2, R1, R2;
+  Vec3d t1, t2;
   CreateStereoPair(K1, K2, R1, R2, t1, t2);
 
   // Compute GT essential and fundamental matrices
-  Mat3 E12;
+  Mat3d E12;
   EssentialFromRt(R1, t1, R2, t2, &E12);
-  Mat3 F12 = K2.inverse().transpose() * E12 * K1.inverse();
+  Mat3d F12 = K2.inverse().transpose() * E12 * K1.inverse();
 
   // Generate a surflet (tangential plane) at 3D point X with normal N
-  Vec3 X, N;
+  Vec3d X, N;
   X.setRandom();
   N.setRandom();
   N.normalize();
-  Mat32 nulls = Nullspace<double>(N);
+  Mat32d nulls = Nullspace<double>(N);
 
   // Project the surflet to get Local Affine Frames LAF(x1, M1) and LAF(x2, M2)
-  Vec2
+  Vec2d
     x1 = project(K1, R1 * X + t1),
     x2 = project(K2, R2 * X + t2);
-  Mat23
+  Mat23d
     x1_gradient = project_gradient(K1, R1 * X + t1) * R1,
     x2_gradient = project_gradient(K2, R2 * X + t2) * R2;
-  Mat2
+  Mat2d
     M1 = x1_gradient * nulls,
     M2 = x2_gradient * nulls;
 
   // Compute the affine correspondence AC(x1, x2, A)
-  Mat2 A_gt = M2 * M1.inverse();
+  Mat2d A_gt = M2 * M1.inverse();
 
   // Compute the first order constraint on an affine correspondence
-  Vec2 a_12, b_12;
+  Vec2d a_12, b_12;
   stereo::CreateFirstOrderConstraint(F12, x1, x2, a_12, b_12);
 
   // add noise 
@@ -139,15 +139,15 @@ void StereoTest_BMVC2016() {
     {M2, view_2}
   };
   for (auto& obs : LAFs_Noisy) {
-    obs.M += Mat2::Random() * 1.0;
+    obs.M += Mat2d::Random() * 1.0;
   }
-  Mat2
+  Mat2d
     M1_noisy = LAFs_Noisy[0].M,
     M2_noisy = LAFs_Noisy[1].M;
-  Mat2 A_noisy = M2_noisy * M1_noisy.inverse();
+  Mat2d A_noisy = M2_noisy * M1_noisy.inverse();
 
   // Perform refinement
-  Mat2 A_refined = A_noisy;
+  Mat2d A_refined = A_noisy;
   stereo::RefineAffineCorrespondence(A_refined, a_12, b_12);
 
 
@@ -163,8 +163,8 @@ void StereoTest_BMVC2016() {
 
   cout << endl;
 
-  Vec3 N_noisy = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_noisy);
-  Vec3 N_refined = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_refined);
+  Vec3d N_noisy = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_noisy);
+  Vec3d N_refined = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_refined);
 
   cout << std::setprecision(4) << std::fixed
     << "Normal estimation:" << endl
@@ -178,32 +178,32 @@ void StereoTest_BMVC2016() {
 }
 
 void StereoTest_BMVC2019() {
-  Mat3 K1, K2, R1, R2;
-  Vec3 t1, t2;
+  Mat3d K1, K2, R1, R2;
+  Vec3d t1, t2;
   CreateStereoPair(K1, K2, R1, R2, t1, t2);
 
   // Compute GT essential and fundamental matrices
-  Mat3 E12;
+  Mat3d E12;
   EssentialFromRt(R1, t1, R2, t2, &E12);
-  Mat3 F12 = K2.inverse().transpose() * E12 * K1.inverse();
+  Mat3d F12 = K2.inverse().transpose() * E12 * K1.inverse();
 
   // Generate a surflet (tangential plane) at 3D point X with normal N
-  Vec3 X, N;
+  Vec3d X, N;
   X.setRandom();
   N.setRandom();
   N.normalize();
-  Mat32 nulls = Nullspace<double>(N);
+  Mat32d nulls = Nullspace<double>(N);
 
   // Project the surflet to get Local Affine Frames LAF(x1, M1) and LAF(x2, M2)
-  Vec2
+  Vec2d
     x1 = project(K1, R1 * X + t1),
     x2 = project(K2, R2 * X + t2);
-  Mat23
+  Mat23d
     x1_gradient = project_gradient(K1, R1 * X + t1) * R1,
     x2_gradient = project_gradient(K2, R2 * X + t2) * R2;
 
   // Compute the first order constraint on an affine correspondence
-  Vec2 a_12, b_12;
+  Vec2d a_12, b_12;
   stereo::CreateFirstOrderConstraint(F12, x1, x2, a_12, b_12);
 
   ViewID view_1{ 0 }, view_2{ 1 };
@@ -218,7 +218,7 @@ void StereoTest_BMVC2019() {
 
   // add noise
   for (auto& obs : LAFs_Noisy) {
-    obs.M += Mat2::Random() * 1.0;
+    obs.M += Mat2d::Random() * 1.0;
   }
 
   ObservedLAFs LAFs_Refined = LAFs_Noisy;
@@ -232,7 +232,7 @@ void StereoTest_BMVC2019() {
 
   // Measure errors
 
-  Mat2
+  Mat2d
     M1_gt = LAFs_GT[0].M,
     M2_gt = LAFs_GT[1].M,
     M1_noisy = LAFs_Noisy[0].M,
@@ -250,11 +250,11 @@ void StereoTest_BMVC2019() {
   cout << "Magnitude to the epipolar constraint after refinement:\n\t" << err_refined << endl;
   cout << endl;
 
-  Mat2 A_noisy = M2_noisy * M1_noisy.inverse();
-  Vec3 N_noisy = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_noisy);
+  Mat2d A_noisy = M2_noisy * M1_noisy.inverse();
+  Vec3d N_noisy = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_noisy);
 
-  Mat2 A_refined = M2_refined * M1_refined.inverse();
-  Vec3 N_refined = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_refined);
+  Mat2d A_refined = M2_refined * M1_refined.inverse();
+  Vec3d N_refined = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_refined);
 
   cout << std::setprecision(4) << std::fixed
     << "Normal estimation:" << endl
@@ -267,14 +267,14 @@ void StereoTest_BMVC2019() {
 void MultiviewTest_BMVC2019() {
   const auto views = CreateMultiviewScene(5);
 
-  Vec3 X, N;
+  Vec3d X, N;
   X.setRandom();
   N.setRandom();
   N.normalize();
-  Mat32 nulls = Nullspace<double>(N);
+  Mat32d nulls = Nullspace<double>(N);
 
   // project surface onto image
-  vector<Vec2> xs(views.size());
+  vector<Vec2d> xs(views.size());
   ObservedLAFs Ms(views.size());
 
   for (auto& view : views) {
@@ -289,12 +289,12 @@ void MultiviewTest_BMVC2019() {
   for (ViewID i = 0; i < views.size()-1; ++i) {
     for (ViewID j = i+1; j < views.size(); ++j) {
       // Compute GT essential and fundamental matrices
-      Mat3 E12;
+      Mat3d E12;
       EssentialFromRt(views[i].R, views[i].t, views[j].R, views[j].t, &E12);
-      Mat3 F12 = views[j].K.inverse().transpose() * E12 * views[i].K.inverse();
+      Mat3d F12 = views[j].K.inverse().transpose() * E12 * views[i].K.inverse();
 
       // Compute the first order constraint on an affine correspondence
-      Vec2 a_ij, b_ij;
+      Vec2d a_ij, b_ij;
       stereo::CreateFirstOrderConstraint(F12, xs[i], xs[j], a_ij, b_ij);
 
       EpipolarConstraintOnLAFs constraint{ a_ij, b_ij, { i, j } };
@@ -305,7 +305,7 @@ void MultiviewTest_BMVC2019() {
   // add noise
   ObservedLAFs Ms_noisy = Ms;
   for (auto& obs : Ms_noisy) {
-    obs.M += Mat2::Random() * 1.0;
+    obs.M += Mat2d::Random() * 1.0;
   }
 
   // refine
@@ -316,24 +316,24 @@ void MultiviewTest_BMVC2019() {
   );
 
   // measure errors
-  Mat2
+  Mat2d
     M1_gt = Ms[0].M,
     M2_gt = Ms[1].M,
     M1_noisy = Ms_noisy[0].M,
     M2_noisy = Ms_noisy[1].M,
     M1_refined = Ms_Refined[0].M,
     M2_refined = Ms_Refined[1].M;
-  Mat23
+  Mat23d
     x1_gradient = views[0].gradient(X),
     x2_gradient = views[1].gradient(X);
 
-  Mat2 A_gt = M2_gt * M1_gt.inverse();
+  Mat2d A_gt = M2_gt * M1_gt.inverse();
 
-  Mat2 A_noisy = M2_noisy * M1_noisy.inverse();
-  Vec3 N_noisy = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_noisy);
+  Mat2d A_noisy = M2_noisy * M1_noisy.inverse();
+  Vec3d N_noisy = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_noisy);
 
-  Mat2 A_refined = M2_refined * M1_refined.inverse();
-  Vec3 N_refined = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_refined);
+  Mat2d A_refined = M2_refined * M1_refined.inverse();
+  Vec3d N_refined = stereo::EstimateNormal_FNE(x1_gradient, x2_gradient, A_refined);
 
   cout << std::setprecision(4) << std::fixed
     << "Normal estimation:" << endl

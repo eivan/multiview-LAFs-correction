@@ -5,51 +5,46 @@
 using namespace Eigen;
 using namespace higher_order;
 
-using Vec2 = Eigen::Vector2d;
-using Vec3 = Eigen::Vector3d;
-using Mat2 = Eigen::Matrix2d;
-using Mat3 = Eigen::Matrix3d;
-
-inline Vec2 project(const Mat3& K, const Vec3& X) {
-  Vec2 hnorm = X.hnormalized();
+inline Vec2d project(const Mat3d& K, const Vec3d& X) {
+  Vec2d hnorm = X.hnormalized();
   return K.topLeftCorner<2, 2>() * hnorm + K.topRightCorner<2, 1>();
 }
 
-inline Mat23 project_gradient(const Mat3& K, const Vec3& X) {
-  Vec2 hnorm = X.hnormalized();
-  Mat23 hnorm_gradient = (Mat23() <<
+inline Mat23d project_gradient(const Mat3d& K, const Vec3d& X) {
+  Vec2d hnorm = X.hnormalized();
+  Mat23d hnorm_gradient = (Mat23d() <<
     1 / X.z(), 0, -hnorm.x() / X.z(),
     0, 1 / X.z(), -hnorm.y() / X.z()).finished();
   return K.topLeftCorner<2, 2>() * hnorm_gradient;
 }
 
 
-inline Mat3 LookAt_direction(const Vector3d& direction, const Vector3d& up = Vector3d::UnitY()) {
-  Mat3 R;
+inline Mat3d LookAt_direction(const Vector3d& direction, const Vector3d& up = Vector3d::UnitY()) {
+  Mat3d R;
   R.row(2) = direction.normalized(); // z
   R.row(0) = up.cross(R.row(2)).normalized(); // x
   R.row(1) = R.row(2).cross(R.row(0)); // y
   return R;
 }
 
-inline Mat3 LookAt_target(const Vec3& eye, const Vec3& target, const Vec3& up = Vec3::UnitY()) {
-  return LookAt_direction(Vec3(target - eye), up);
+inline Mat3d LookAt_target(const Vec3d& eye, const Vec3d& target, const Vec3d& up = Vec3d::UnitY()) {
+  return LookAt_direction(Vec3d(target - eye), up);
 }
 
 // <openMVG/multiview/essential.cpp>
-inline void RelativeCameraMotion(const Mat3& R1,
-  const Vec3& t1,
-  const Mat3& R2,
-  const Vec3& t2,
-  Mat3* R,
-  Vec3* t) {
+inline void RelativeCameraMotion(const Mat3d& R1,
+  const Vec3d& t1,
+  const Mat3d& R2,
+  const Vec3d& t2,
+  Mat3d* R,
+  Vec3d* t) {
   *R = R2 * R1.transpose();
   *t = t2 - (*R) * t1;
 }
 
 // <openMVG/numeric/numeric.cpp>
-inline Mat3 CrossProductMatrix(const Vec3& x) {
-  Mat3 X;
+inline Mat3d CrossProductMatrix(const Vec3d& x) {
+  Mat3d X;
   X << 0, -x(2), x(1),
     x(2), 0, -x(0),
     -x(1), x(0), 0;
@@ -57,15 +52,15 @@ inline Mat3 CrossProductMatrix(const Vec3& x) {
 }
 
 // <openMVG/multiview/essential.cpp>
-inline void EssentialFromRt(const Mat3& R1,
-  const Vec3& t1,
-  const Mat3& R2,
-  const Vec3& t2,
-  Mat3* E) {
-  Mat3 R;
-  Vec3 t;
+inline void EssentialFromRt(const Mat3d& R1,
+  const Vec3d& t1,
+  const Mat3d& R2,
+  const Vec3d& t2,
+  Mat3d* E) {
+  Mat3d R;
+  Vec3d t;
   RelativeCameraMotion(R1, t1, R2, t2, &R, &t);
-  const Mat3 Tx = CrossProductMatrix(t);
+  const Mat3d Tx = CrossProductMatrix(t);
   *E = Tx * R;
 }
 

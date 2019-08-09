@@ -4,9 +4,9 @@
 #include <unordered_map>
 
 void higher_order::stereo::CreateFirstOrderConstraint(
-  const Eigen::Matrix3d& F,
-  const Eigen::Vector2d& p1, const Eigen::Vector2d& p2,
-  Eigen::Vector2d& a, Eigen::Vector2d& b)
+  const Mat3d& F,
+  const Vec2d& p1, const Vec2d& p2,
+  Vec2d& a, Vec2d& b)
 {
   // See Eq. (2) and (3) of [1]
   a = (F * p1.homogeneous()).head<2>();
@@ -14,10 +14,10 @@ void higher_order::stereo::CreateFirstOrderConstraint(
 }
 
 void higher_order::stereo::CreateFirstOrderConstraint(
-  const Eigen::Matrix3d& E,
-  const Eigen::Vector3d& q1, const Eigen::Vector3d& q2,
-  const Mat32& nabla_q1, const Mat32& nabla_q2,
-  Eigen::Vector2d& a, Eigen::Vector2d& b)
+  const Mat3d& E,
+  const Vec3d& q1, const Vec3d& q2,
+  const Mat32d& nabla_q1, const Mat32d& nabla_q2,
+  Vec2d& a, Vec2d& b)
 {
   // See Eq. (2) and (3) of [1]
   a = nabla_q2.transpose() * E * q1;
@@ -25,14 +25,14 @@ void higher_order::stereo::CreateFirstOrderConstraint(
 }
 
 void higher_order::stereo::RefineAffineCorrespondence(
-  Eigen::Matrix2d& A,
-  const Eigen::Vector2d& a, const Eigen::Vector2d& b)
+  Mat2d& A,
+  const Vec2d& a, const Vec2d& b)
 {
   A -= (1 / a.dot(a)) * a * (a.transpose() * A + b.transpose());
 }
 
 void higher_order::multiview::RefineLocalAffineFrames(
-  const Eigen::MatrixXd& epipolar_constraints, MatX2& local_affine_frames)
+  const Eigen::MatrixXd& epipolar_constraints, MatX2d& local_affine_frames)
 {
   assert(local_affine_frames.rows() >= 4);
   assert(epipolar_constraints.rows() > 0);
@@ -60,7 +60,7 @@ void higher_order::multiview::RefineLocalAffineFrames(
 
 void higher_order::multiview::RefineLocalAffineFrames(
   const EpipolarConstraints& epipolar_constraints,
-  std::vector<std::pair<ViewID, Eigen::Matrix2d>>& local_affine_frames) 
+  ObservedLAFs& local_affine_frames)
 {
   assert(local_affine_frames.size() >= 2);
   assert(epipolar_constraints.size() > 0);
@@ -69,8 +69,8 @@ void higher_order::multiview::RefineLocalAffineFrames(
   const size_t N_C = epipolar_constraints.size();
 
   std::unordered_map<ViewID, size_t> inverse_view_indices;
-  for (size_t i = 0; i < local_affine_frames.size(); ++i) {
-    const auto& view = local_affine_frames[i].first;
+  for (size_t i = 0; i < N_V; ++i) {
+    const auto view = local_affine_frames[i].viewID;
     inverse_view_indices[view] = i;
   }
 
@@ -79,7 +79,7 @@ void higher_order::multiview::RefineLocalAffineFrames(
   C.resize(N_C, 2 * N_V);
   C.setZero();
 
-  for (size_t i = 0; i < epipolar_constraints.size(); ++i) {
+  for (size_t i = 0; i < N_C; ++i) {
     const auto& epi = epipolar_constraints[i];
     const auto& [view_i, view_j] = epi.view_pair;
 
@@ -88,16 +88,16 @@ void higher_order::multiview::RefineLocalAffineFrames(
   }
 
   // Fill up right hand side with the linear transformation (as in LAFs)
-  MatX2 lafs;
+  MatX2d lafs;
   lafs.resize(2 * N_V, Eigen::NoChange);
   for (size_t i = 0; i < local_affine_frames.size(); ++i) {
-    lafs.block<2, 2>(i * 2, 0) = local_affine_frames[i].second;
+    lafs.block<2, 2>(i * 2, 0) = local_affine_frames[i].M;
   }
 
   RefineLocalAffineFrames(C, lafs);
 
   // Copy solution back to input
   for (size_t i = 0; i < local_affine_frames.size(); ++i) {
-    local_affine_frames[i].second = lafs.block<2, 2>(i * 2, 0);
+    local_affine_frames[i].M = lafs.block<2, 2>(i * 2, 0);
   }
 }

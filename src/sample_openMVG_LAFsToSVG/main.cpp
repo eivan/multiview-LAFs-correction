@@ -20,15 +20,16 @@ using namespace openMVG::sfm;
 using namespace openMVG::geometry;
 using namespace std;
 
-void DrawSVGs(const SfM_Data& sfm_data);
-
-// display LAFs (original and refined)
+void DrawSVGs(const SfM_Data& sfm_data, const std::string& sOutDir);
 
 int main(int argc, char** argv) {
   CmdLine cmd;
 
   std::string sSfM_Data_Filename;
+  std::string sOutDir = "";
+
   cmd.add(make_option('i', sSfM_Data_Filename, "sfmdata"));
+  cmd.add(make_option('o', sOutDir, "outdir"));
 
   try {
     if (argc == 1) {
@@ -54,12 +55,16 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  DrawSVGs(sfm_data);
+  if (!stlplus::folder_exists(sOutDir)) {
+    stlplus::folder_create(sOutDir);
+  }
+
+  DrawSVGs(sfm_data, sOutDir);
 
   return 0;
 }
 
-void DrawSVGs(const SfM_Data& sfm_data) {
+void DrawSVGs(const SfM_Data& sfm_data, const std::string& sOutDir) {
 
   // Generate random colors to draw regions with.
   // Matching regions are sharing colors.
@@ -105,9 +110,10 @@ void DrawSVGs(const SfM_Data& sfm_data) {
     }
 
     // Save the SVG file
-    std::string filename = "out_" + std::to_string(view->id_view) + ".svg";
-    std::cout << filename << std::endl;
-    std::ofstream svgFile(filename.c_str());
+    std::string output_filename = stlplus::create_filespec(
+      sOutDir, "view_" + std::to_string(view->id_view), ".svg");
+    
+    std::ofstream svgFile(output_filename.c_str());
     if (svgFile.is_open()) {
       svgFile << svgStream.closeSvgFile().str();
       svgFile.close();

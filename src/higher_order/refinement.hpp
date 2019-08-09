@@ -21,9 +21,9 @@ namespace higher_order::stereo {
   // Output: vector-coefficients (a, b) of the constraint.
   // See Eq. (2) and (3) of [1]
   void CreateFirstOrderConstraint(
-    const Eigen::Matrix3d& F,
-    const Eigen::Vector2d& p1, const Eigen::Vector2d& p2,
-    Eigen::Vector2d& a, Eigen::Vector2d& b);
+    const Mat3d& F,
+    const Vec2d& p1, const Vec2d& p2,
+    Vec2d& a, Vec2d& b);
 
   // Creates first order constraint on a pair of local affine frames.
   // Note: This method works for central views.
@@ -31,15 +31,15 @@ namespace higher_order::stereo {
   // Output: vector-coefficients (a, b) of the constraint.
   // See Eq. (2) and (3) of [1]
   void CreateFirstOrderConstraint(
-    const Eigen::Matrix3d& E,
-    const Eigen::Vector3d& q1, const Eigen::Vector3d& q2,
-    const Mat32& nabla_q1, const Mat32& nabla_q2,
-    Eigen::Vector2d& a, Eigen::Vector2d& b);
+    const Mat3d& E,
+    const Vec3d& q1, const Vec3d& q2,
+    const Mat32d& nabla_q1, const Mat32d& nabla_q2,
+    Vec2d& a, Vec2d& b);
 
   // A compact and efficient solution to [2]
   void RefineAffineCorrespondence(
-    Eigen::Matrix2d& A,
-    const Eigen::Vector2d& a, const Eigen::Vector2d& b);
+    Mat2d& A,
+    const Vec2d& a, const Vec2d& b);
 
 } // higher_order::stereo
 
@@ -48,12 +48,12 @@ namespace higher_order::multiview {
   // L2-Optimal Multi-view Correction of Local Affine Frames
   void RefineLocalAffineFrames(
     const Eigen::MatrixXd& epipolar_constraints,
-    MatX2& local_affine_frames);
+    MatX2d& local_affine_frames);
 
   // L2-Optimal Multi-view Correction of Local Affine Frames
   void RefineLocalAffineFrames(
     const EpipolarConstraints& epipolar_constraints,
-    std::vector<std::pair<ViewID, Eigen::Matrix2d>>& local_affine_frames);
+    ObservedLAFs& local_affine_frames);
 
 } // higher_order::multiview
 

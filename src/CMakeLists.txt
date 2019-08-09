@@ -53,12 +53,14 @@ include_directories (
 # ==============================================================================
 # Structure: Library
 # ==============================================================================
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 add_subdirectory(higher_order)
 
 # ==============================================================================
 # Structure: Applications
 # ==============================================================================
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 add_subdirectory(sample_synthetic)
 

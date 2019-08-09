@@ -135,15 +135,15 @@ void StereoTest_BMVC2016() {
   // add noise 
   ViewID view_1{ 0 }, view_2{ 1 };
   ObservedLAFs LAFs_Noisy{
-    {view_1, M1},
-    {view_2, M2}
+    {M1, view_1},
+    {M2, view_2}
   };
   for (auto& obs : LAFs_Noisy) {
-    obs.second += Mat2::Random() * 1.0;
+    obs.M += Mat2::Random() * 1.0;
   }
   Mat2
-    M1_noisy = LAFs_Noisy[0].second,
-    M2_noisy = LAFs_Noisy[1].second;
+    M1_noisy = LAFs_Noisy[0].M,
+    M2_noisy = LAFs_Noisy[1].M;
   Mat2 A_noisy = M2_noisy * M1_noisy.inverse();
 
   // Perform refinement
@@ -209,8 +209,8 @@ void StereoTest_BMVC2019() {
   ViewID view_1{ 0 }, view_2{ 1 };
 
   ObservedLAFs LAFs_GT{
-    {view_1, /* M1 = */ x1_gradient * nulls },
-    {view_2, /* M2 = */ x2_gradient * nulls }
+    {/* M1 = */ x1_gradient * nulls, view_1 },
+    {/* M2 = */ x2_gradient * nulls, view_2 }
   };
 
   // Test
@@ -218,14 +218,14 @@ void StereoTest_BMVC2019() {
 
   // add noise
   for (auto& obs : LAFs_Noisy) {
-    obs.second += Mat2::Random() * 1.0;
+    obs.M += Mat2::Random() * 1.0;
   }
 
   ObservedLAFs LAFs_Refined = LAFs_Noisy;
 
   multiview::RefineLocalAffineFrames(
     EpipolarConstraints{
-      { {view_1, view_2}, a_12, b_12 }
+      { a_12, b_12,  {view_1, view_2} }
     },
     LAFs_Refined
   );
@@ -233,12 +233,12 @@ void StereoTest_BMVC2019() {
   // Measure errors
 
   Mat2
-    M1_gt = LAFs_GT[0].second,
-    M2_gt = LAFs_GT[1].second,
-    M1_noisy = LAFs_Noisy[0].second,
-    M2_noisy = LAFs_Noisy[1].second,
-    M1_refined = LAFs_Refined[0].second,
-    M2_refined = LAFs_Refined[1].second;
+    M1_gt = LAFs_GT[0].M,
+    M2_gt = LAFs_GT[1].M,
+    M1_noisy = LAFs_Noisy[0].M,
+    M2_noisy = LAFs_Noisy[1].M,
+    M1_refined = LAFs_Refined[0].M,
+    M2_refined = LAFs_Refined[1].M;
 
   double err_gt = (M2_gt.transpose() * a_12 + M1_gt.transpose() * b_12).norm();
   double err_noisy = (M2_noisy.transpose() * a_12 + M1_noisy.transpose() * b_12).norm();
@@ -279,8 +279,8 @@ void MultiviewTest_BMVC2019() {
 
   for (auto& view : views) {
     xs[view.index] = view(X);
-    Ms[view.index].first = view.index;
-    Ms[view.index].second = view.gradient(X) * nulls;
+    Ms[view.index].viewID = view.index;
+    Ms[view.index].M = view.gradient(X) * nulls;
   }
 
   // construct epipolar constraints
@@ -294,10 +294,10 @@ void MultiviewTest_BMVC2019() {
       Mat3 F12 = views[j].K.inverse().transpose() * E12 * views[i].K.inverse();
 
       // Compute the first order constraint on an affine correspondence
-      Vec2 a_12, b_12;
-      stereo::CreateFirstOrderConstraint(F12, xs[i], xs[j], a_12, b_12);
+      Vec2 a_ij, b_ij;
+      stereo::CreateFirstOrderConstraint(F12, xs[i], xs[j], a_ij, b_ij);
 
-      EpipolarConstraintOnLAFs constraint{ { i, j }, a_12, b_12 };
+      EpipolarConstraintOnLAFs constraint{ a_ij, b_ij, { i, j } };
       constraints.emplace_back(constraint);
     }
   }
@@ -305,7 +305,7 @@ void MultiviewTest_BMVC2019() {
   // add noise
   ObservedLAFs Ms_noisy = Ms;
   for (auto& obs : Ms_noisy) {
-    obs.second += Mat2::Random() * 1.0;
+    obs.M += Mat2::Random() * 1.0;
   }
 
   // refine
@@ -317,12 +317,12 @@ void MultiviewTest_BMVC2019() {
 
   // measure errors
   Mat2
-    M1_gt = Ms[0].second,
-    M2_gt = Ms[1].second,
-    M1_noisy = Ms_noisy[0].second,
-    M2_noisy = Ms_noisy[1].second,
-    M1_refined = Ms_Refined[0].second,
-    M2_refined = Ms_Refined[1].second;
+    M1_gt = Ms[0].M,
+    M2_gt = Ms[1].M,
+    M1_noisy = Ms_noisy[0].M,
+    M2_noisy = Ms_noisy[1].M,
+    M1_refined = Ms_Refined[0].M,
+    M2_refined = Ms_Refined[1].M;
   Mat23
     x1_gradient = views[0].gradient(X),
     x2_gradient = views[1].gradient(X);

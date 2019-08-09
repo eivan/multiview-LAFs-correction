@@ -5,8 +5,8 @@
 namespace higher_order::stereo {
 
   // TODO: reference
-  Eigen::Vector3d EstimateNormal_FNE(
-    const Mat23& gradient1, const Mat23& gradient2,
-    const Eigen::Matrix2d& affine);
+  Vec3d EstimateNormal_FNE(
+    const Mat23d& gradient1, const Mat23d& gradient2,
+    const Mat2d& affine);
 
 } // higher_order::stereo

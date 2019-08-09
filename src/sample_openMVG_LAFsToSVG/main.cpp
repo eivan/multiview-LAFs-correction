@@ -78,6 +78,9 @@ void DrawSVGs(const SfM_Data& sfm_data, const std::string& sOutDir) {
     randhexs[landmark.first] = str;
   }
 
+  C_Progress_display my_progress_bar(sfm_data.GetViews().size(), std::cout,
+    "\n- PROCESSING VIEWS (Writing SVGs) -\n");
+
   // Draw SVGs for all views.
   for (auto& v : sfm_data.views) {
     auto view = v.second.get();
@@ -118,6 +121,8 @@ void DrawSVGs(const SfM_Data& sfm_data, const std::string& sOutDir) {
       svgFile << svgStream.closeSvgFile().str();
       svgFile.close();
     }
+
+    ++my_progress_bar;
   }
 
 }

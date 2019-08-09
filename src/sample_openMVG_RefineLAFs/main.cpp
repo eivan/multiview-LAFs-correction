@@ -182,7 +182,7 @@ void RefineLAFsForLandmark(
 
 void RefineAllLAFs(SfM_Data& sfm_data) {
   C_Progress_display my_progress_bar(sfm_data.GetLandmarks().size(), std::cout,
-    "\n- PROCESSING LANDMARKS -\n");
+    "\n- PROCESSING LANDMARKS (Refining Local Affine Frames) -\n");
 
   for (auto& landmark : sfm_data.structure) {
     auto& obs = landmark.second.obs;

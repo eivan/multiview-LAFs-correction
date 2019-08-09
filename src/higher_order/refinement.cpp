@@ -44,15 +44,18 @@ void higher_order::multiview::RefineLocalAffineFrames(
   //   Sigma is r×r
   //   V is n×r
 
-  const auto r = std::min({ svd.rank(), epipolar_constraints.cols() - 3 });
+  const auto r = std::min({
+    svd.rank(),
+    epipolar_constraints.cols() - 3,
+    epipolar_constraints.rows() });
 
   local_affine_frames -= svd.matrixU().leftCols(r) *
     (svd.matrixU().leftCols(r).transpose() * local_affine_frames);
 
   // If rank can be guaranteed to be epipolar_constraints.cols() - 3, then:
-  //  local_affine_frames -=
-  //    epipolar_constraints.transpose() *
-  //    epipolar_constraints.transpose().colPivHouseholderQr().solve(local_affine_frames);
+  /* local_affine_frames -=
+       epipolar_constraints.transpose() *
+       epipolar_constraints.transpose().colPivHouseholderQr().solve(local_affine_frames);*/
 }
 
 void higher_order::multiview::RefineLocalAffineFrames(
@@ -79,6 +82,7 @@ void higher_order::multiview::RefineLocalAffineFrames(
   for (size_t i = 0; i < epipolar_constraints.size(); ++i) {
     const auto& epi = epipolar_constraints[i];
     const auto& [view_i, view_j] = epi.view_pair;
+
     C.block<1, 2>(i, inverse_view_indices.at(view_i) * 2) = epi.b.transpose();  // "b" for view i
     C.block<1, 2>(i, inverse_view_indices.at(view_j) * 2) = epi.a.transpose();  // "a" for view j
   }

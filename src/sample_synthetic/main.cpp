@@ -1,39 +1,34 @@
 #define _USE_MATH_DEFINES
 
+#include <time.h>
+#include <iomanip>
 #include <iostream>
+#include <set>
+
 #include <higher_order/refinement.hpp>
 #include <higher_order/structure_estimation.hpp>
 
 #include "helper.hpp"
-#include <time.h>
-#include <iomanip>
+
 
 using namespace std;
 using namespace higher_order;
-
-// TODO:
-//
-// case1: multiview
-// - create synthetic views
-// - project, project gradient
-// - test methods (no noise, noise)
-// - expect solution to be close to GT
 
 void StereoTest_BMVC2016();
 void StereoTest_BMVC2019();
 void MultiviewTest_BMVC2019();
 
 int main() {
-  //srand(time(0));
+  auto seed = time(0);
 
-  srand(42);
+  srand(seed);
   cout
     << "================================================================================" << endl
     << "  Testing BMVC2016 (stereo only)" << endl
     << "================================================================================" << endl;
   StereoTest_BMVC2016();
 
-  srand(42);
+  srand(seed);
   cout
     << "================================================================================" << endl
     << "  Testing BMVC2019 (stereo)" << endl
@@ -44,7 +39,6 @@ int main() {
     << "================================================================================" << endl
     << "  Testing BMVC2019 (multi-view)" << endl
     << "================================================================================" << endl;
-  srand(time(0));
   MultiviewTest_BMVC2019();
 
   return 0;
@@ -66,6 +60,40 @@ void CreateStereoPair(Mat3& K1, Mat3& K2, Mat3& R1, Mat3& R2, Vec3& t1, Vec3& t2
 
   t1 = -R1 * eye1;
   t2 = -R2 * eye2;
+}
+
+auto CreateMultiviewScene(size_t num_views) {
+  assert(num_views > 1);
+
+  struct View {
+    ViewID index;
+    Mat3 K, R;
+    Vec3 t;
+
+    inline Vec2 operator()(const Vec3& X) const {
+      return project(K, R * X + t);
+    }
+
+    inline Mat23 gradient(const Vec3& X) const {
+      return project_gradient(K, R * X + t) * R;
+    }
+  };
+
+  std::vector<View> views(num_views);
+
+  Vec3 target{ 0,0,0 };
+
+  for (ViewID i = 0; i < num_views; ++i) {
+
+    Vec3 eye = Vec3::Random().normalized() * 10;
+
+    views[i].index = i;
+    views[i].K = (Mat3() << 1500, 0, 750, 0, 1500, 750, 0, 0, 1).finished();
+    views[i].R = LookAt_target(eye, target);
+    views[i].t = -views[i].R * eye;
+  }
+
+  return views;
 }
 
 void StereoTest_BMVC2016() {
@@ -236,40 +264,6 @@ void StereoTest_BMVC2019() {
   cout << endl;
 }
 
-auto CreateMultiviewScene(size_t num_views) {
-  assert(num_views > 1);
-
-  struct View {
-    ViewID index;
-    Mat3 K, R;
-    Vec3 t;
-
-    inline Vec2 operator()(const Vec3& X) const {
-      return project(K, R * X + t);
-    }
-
-    inline Mat23 gradient(const Vec3& X) const {
-      return project_gradient(K, R * X + t) * R;
-    }
-  };
-
-  std::vector<View> views(num_views);
-
-  Vec3 target{ 0,0,0 };
-
-  for (ViewID i = 0; i < num_views; ++i) {
-
-    Vec3 eye = Vec3::Random().normalized() * 10;
-
-    views[i].index = i;
-    views[i].K = (Mat3() << 1500, 0, 750, 0, 1500, 750, 0, 0, 1).finished();
-    views[i].R = LookAt_target(eye, target);
-    views[i].t = -views[i].R * eye;
-  }
-
-  return views;
-}
-
 void MultiviewTest_BMVC2019() {
   const auto views = CreateMultiviewScene(5);
 
@@ -292,8 +286,8 @@ void MultiviewTest_BMVC2019() {
   // construct epipolar constraints
   EpipolarConstraints constraints;
 
-  for (ViewID i = 0; i < views.size(); ++i) {
-    for (ViewID j = i; j < views.size() - 1; ++j) {
+  for (ViewID i = 0; i < views.size()-1; ++i) {
+    for (ViewID j = i+1; j < views.size(); ++j) {
       // Compute GT essential and fundamental matrices
       Mat3 E12;
       EssentialFromRt(views[i].R, views[i].t, views[j].R, views[j].t, &E12);

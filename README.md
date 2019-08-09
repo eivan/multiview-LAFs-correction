@@ -21,4 +21,4 @@ See [BUILD](https://github.com/eivan/multiview-LAFs-correction/blob/master/BUILD
 Dependencies:
 
 - Eigen3
-- OpenMVG ([a modified version](/eivan/openMVG/tree/develop)) (optional, for specific samples)
+- OpenMVG ([a modified version](https://github.com/eivan/openMVG/tree/develop)) (optional, for specific samples)

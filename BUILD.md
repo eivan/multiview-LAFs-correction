@@ -15,7 +15,7 @@ Dependencies:
 
 Optional dependencies:
 
-- OpenMVG ([a modified version](/eivan/openMVG/tree/develop))
+- OpenMVG ([a modified version](https://github.com/eivan/openMVG/tree/develop))
 
 Note:
 
@@ -64,10 +64,10 @@ $ mkdir build_dir
 $ cd build_dir
 ```
 
-2. Configure CMAKE.
+2. Configure CMAKE (see the choice of [CMAKE options](#cmakevariables)).
 ```shell
 $ cmake-gui ../src
 ```
-See the choice of [CMAKE options](#cmakevariables).
+
 
 3. Compile.

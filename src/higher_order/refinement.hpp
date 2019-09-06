@@ -58,11 +58,13 @@ namespace higher_order::stereo {
    * Creates first order constraint on a pair of local affine frames.
    * Note: This method works for central views.
    * See Eq. (2) and (3) of I. Eichhardt, D. Barath, Optimal Multi-view Correction of Local Affine Frames. In Proc. British Machine Vision Conf., 2019.
-   * \param F       the fundamental matrix
-   * \param p1      bearing vector on image 1
-   * \param p2      bearing vector on image 2
-   * \param[out] a  first vector coefficient of the differential constraint
-   * \param[out] b  second vector coefficient of the differential constraint
+   * \param E         the essential matrix
+   * \param q1        bearing vector on image 1
+   * \param q2        bearing vector on image 2
+   * \param nabla_q1  the Jacobian of the bearing vector on image 1
+   * \param nabla_q2  the Jacobian of the bearing vector on image 2
+   * \param[out] a    first vector coefficient of the differential constraint
+   * \param[out] b    second vector coefficient of the differential constraint
    */
   void CreateFirstOrderConstraint(
     const Mat3d& E,

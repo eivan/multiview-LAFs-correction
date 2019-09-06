@@ -1,6 +1,5 @@
 # Optimal Multi-view Correction of Local Affine Frames
-Code for our BMVC2019 paper: "Optimal Multi-view Correction of Local Affine Frames" by Ivan Eichhardt and Daniel Barath.
-A preprint is available at [arXiv.org](https://arxiv.org/abs/1905.00519).
+Code for our BMVC2019 paper: "[Optimal Multi-view Correction of Local Affine Frames](https://bmvc2019.org/wp-content/uploads/papers/0816-paper.pdf)" by Ivan Eichhardt and Daniel Barath. Further available resources: [paper](https://bmvc2019.org/wp-content/uploads/papers/0816-paper.pdf), [supplementary material](https://bmvc2019.org/wp-content/uploads/papers/0816-supplementary.pdf).
 
 Cite it as
 ```

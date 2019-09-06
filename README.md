@@ -5,7 +5,13 @@ Preprint available at [arXiv.org](https://arxiv.org/abs/1905.00519).
 
 Cite it as
 ```
-Ivan Eichhardt and Daniel Barath, "Optimal Multi-view Correction of Local Affine Frames", 2019, British Machine Vision Conference
+@InProceedings{Eichhardt_Barath_2019_BMVC,
+	author = {Eichhardt, Ivan and Barath, Daniel},
+	title = {Optimal Multi-view Correction of Local Affine Frames},
+	booktitle = {British Machine Vision Conference (BMVC)},
+	month = {September},
+	year = {2019}
+}
 ```
 
 Introduction

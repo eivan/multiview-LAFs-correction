@@ -20,10 +20,11 @@
 
 # database can be found here: https://github.com/openMVG/SfM_quality_evaluation
 
-import commands
+import sys
 import os
 import subprocess
-import sys
+if sys.version_info[0] < 3:
+    import commands
 
 def ensure_dir(f):
     d = os.path.dirname(f)
@@ -57,7 +58,7 @@ output_eval_dir = os.path.join(sys.argv[4], "evaluation_output")
 
 for directory in os.listdir(input_eval_dir):
 
-  print directory
+  print (directory)
   matches_dir = os.path.join(output_eval_dir, directory, "matching")
 
   ensure_dir(matches_dir)

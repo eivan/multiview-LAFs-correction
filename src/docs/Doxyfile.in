@@ -1,0 +1,20 @@
+PROJECT_NAME           = multiview-LAFs-correction
+PROJECT_BRIEF          = "Code for our BMVC2019 paper: Optimal Multi-view Correction of Local Affine Frames by Ivan Eichhardt and Daniel Barath."
+
+OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/doc_doxygen/
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/ @CMAKE_CURRENT_SOURCE_DIR@/higher_order/ @CMAKE_CURRENT_SOURCE_DIR@/sample_openMVG_EstimateNormals/ @CMAKE_CURRENT_SOURCE_DIR@/sample_openMVG_LAFsToSVG/ @CMAKE_CURRENT_SOURCE_DIR@/sample_openMVG_RefineLAFs/ @CMAKE_CURRENT_SOURCE_DIR@/sample_synthetic/ @CMAKE_CURRENT_SOURCE_DIR@/docs
+
+OUTPUT_LANGUAGE        = English
+
+MULTILINE_CPP_IS_BRIEF = YES
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+SHOW_DIRECTORIES       = YES
+SOURCE_BROWSER         = YES
+HTML_DYNAMIC_SECTIONS  = YES
+USE_MATHJAX            = YES		# https://www.stack.nl/~dimitri/doxygen/manual/formulas.html
+PAPER_TYPE             = letter
+HIDE_UNDOC_RELATIONS   = NO
+#HAVE_DOT               = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES

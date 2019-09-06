@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(multiview-LAFs-correction LANGUAGES CXX)
 
 # indicate the documentation build as an option and set it to ON by default
-option(BUILD_DOC "Build documentation" OFF)
+option(BUILD_DOC "Build documentation" ON)
 
 # indicate if OPENMP should be enabled
 option(USE_OPENMP "Use OPENMP" ON)

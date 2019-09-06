@@ -29,11 +29,23 @@
 using namespace Eigen;
 using namespace higher_order;
 
+/*!
+ * Funtion to evaluate 3D to 2D pinhole projection
+ * \param[in] K    3-by-3 camera matrix
+ * \param[in] X    3D point to project onto image plane
+ * \return         projected 2D image point
+ */
 inline Vec2d project(const Mat3d& K, const Vec3d& X) {
   Vec2d hnorm = X.hnormalized();
   return K.topLeftCorner<2, 2>() * hnorm + K.topRightCorner<2, 1>();
 }
 
+/*!
+ * Funtion to evaluate the gradient of 3D to 2D pinhole projection
+ * \param[in] K    3-by-3 camera matrix
+ * \param[in] X    3D point to project onto image plane
+ * \return         2-by-3 Jacobian of the projection
+ */
 inline Mat23d project_gradient(const Mat3d& K, const Vec3d& X) {
   Vec2d hnorm = X.hnormalized();
   Mat23d hnorm_gradient = (Mat23d() <<
@@ -42,7 +54,12 @@ inline Mat23d project_gradient(const Mat3d& K, const Vec3d& X) {
   return K.topLeftCorner<2, 2>() * hnorm_gradient;
 }
 
-
+/*!
+ * Create 3D "look at" rotation matrix using two directions
+ * \param[in] direction  direction to look at
+ * \param[in] up         general up direction
+ * \return               the 3-by-3 rotation matrix
+ */
 inline Mat3d LookAt_direction(const Vector3d& direction, const Vector3d& up = Vector3d::UnitY()) {
   Mat3d R;
   R.row(2) = direction.normalized(); // z
@@ -51,6 +68,13 @@ inline Mat3d LookAt_direction(const Vector3d& direction, const Vector3d& up = Ve
   return R;
 }
 
+/*!
+ * Create 3D "look at" rotation matrix using a point of the eye, a target and a general up direction
+ * \param[in] eye     the point of the eye
+ * \param[in] target  target point to look at
+ * \param[in] up      general up direction
+ * \return            the 3-by-3 rotation matrix
+ */
 inline Mat3d LookAt_target(const Vec3d& eye, const Vec3d& target, const Vec3d& up = Vec3d::UnitY()) {
   return LookAt_direction(Vec3d(target - eye), up);
 }
@@ -88,6 +112,11 @@ inline void EssentialFromRt(const Mat3d& R1,
   *E = Tx * R;
 }
 
+/*!
+ * Compute the 3-by-2 nullspace of the surface normal to simulate. In the example this is typically used for simulating the Jacobian of a parametric surface.
+ * \param[in] normal  the surface normal
+ * \return            the 3-by-2 nullspace of the surface normal
+ */
 template <typename T>
 inline Matrix<T, 3, 2> Nullspace(const Matrix<T, 3, 1> & normal) {
   return normal.jacobiSvd(Eigen::ComputeFullU).matrixU().block<3, 2>(0, 1);

@@ -22,6 +22,8 @@ Note:
 - CMAKE variables you can configure:
 <a name="cmakevariables"></a>
 
+  - BUILD_DOC (ON(default)/OFF)
+      - Build documentation using DoxyGen
   - USE_INTERNAL_OPENMVG (ON(default)/OFF)
       - Build OpenMVG as a submodule
   - BUILD_OPENMVG_EXAMPLES (ON(default)/OFF)

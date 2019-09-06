@@ -22,6 +22,10 @@ int main() {
   auto seed = time(0);
 
   srand(seed);
+  // Testing the method proposed in:
+  // Daniel Barath, Jiri Matas, and Levente Hajder. 
+  // "Accurate closed-form estimation of local affine transformations consistent with the epipolar geometry." 
+  // (2016): 1-12., British Machine Vision Conference"
   cout
     << "================================================================================" << endl
     << "  Testing BMVC2016 (stereo only)" << endl
@@ -29,6 +33,11 @@ int main() {
   StereoTest_BMVC2016();
 
   srand(seed);
+  // Testing the method proposed in:
+  // Ivan Eichhardt and Daniel Barath. 
+  // "Optimal Multi-view Correction of Local Affine Frames." 
+  // (2019), British Machine Vision Conference"
+  // The scene has the same two cameras as for the previous test.
   cout
     << "================================================================================" << endl
     << "  Testing BMVC2019 (stereo)" << endl
@@ -39,6 +48,11 @@ int main() {
     << "================================================================================" << endl
     << "  Testing BMVC2019 (multi-view)" << endl
     << "================================================================================" << endl;
+  // Testing the method proposed in:
+  // Ivan Eichhardt and Daniel Barath. 
+  // "Optimal Multi-view Correction of Local Affine Frames." 
+  // (2019), British Machine Vision Conference"
+  // The scene has multiple cameras
   MultiviewTest_BMVC2019();
 
   return 0;

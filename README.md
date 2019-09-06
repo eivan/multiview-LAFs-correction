@@ -5,7 +5,7 @@ Preprint available at [arXiv.org](https://arxiv.org/abs/1905.00519).
 
 Cite it as
 ```
-% TODO
+Ivan Eichhardt and Daniel Barath, "Optimal Multi-view Correction of Local Affine Frames", 2019, British Machine Vision Conference
 ```
 
 Introduction

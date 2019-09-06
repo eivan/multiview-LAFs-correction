@@ -1,7 +1,6 @@
 # Optimal Multi-view Correction of Local Affine Frames
-Code for our BMVC2019 paper: "Optimal Multi-view Correction of Local Affine Frames" by Ivan Eichhardt and Daniel Barath
-
-Preprint available at [arXiv.org](https://arxiv.org/abs/1905.00519).
+Code for our BMVC2019 paper: "Optimal Multi-view Correction of Local Affine Frames" by Ivan Eichhardt and Daniel Barath.
+A preprint is available at [arXiv.org](https://arxiv.org/abs/1905.00519).
 
 Cite it as
 ```
@@ -28,3 +27,10 @@ Dependencies:
 
 - Eigen3
 - OpenMVG ([a modified version](https://github.com/eivan/openMVG/tree/develop)) (optional, for specific samples)
+
+OpenMVG examples (optional)
+---------------------------
+
+Follow the Wiki of the [OpenMVG examples](https://github.com/eivan/multiview-LAFs-correction/wiki/Running-examples-that-use-OpenMVG) for a description of the OpenMVG-based tools provided with this repository.
+
+
